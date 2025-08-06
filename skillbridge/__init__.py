@@ -112,7 +112,24 @@ def generate_static_completion() -> None:
                     continue
 
                 lines = True
-                fout.write(f'        {func}: staticmethod\n')
+                
+                doc_string :str = getattr(value, func).__str__()
+                args = doc_string[doc_string.find('('): doc_string.find(')') + 1].split('\n')
+
+                a = []
+                symbols = ['[', ']', '(', ')', '{', '}', '=', '|']  
+                for i, arg in enumerate(args):
+                    if any(s in arg for s in symbols) or len(arg) <= 2:
+                        pass
+                    else:
+                        a.append(args[i].strip('...').strip('<').strip('>').strip("'").strip())
+                        
+                a = ', '.join(a)
+                fout.write(f'      def {func}(self{", " if a else ""}{a}):\n')
+                fout.write('            """')
+                fout.write(f'            {doc_string}\n')
+                fout.write('            """\n')
+                fout.write('            pass\n')
 
             if not lines:
                 fout.write('        pass\n')
